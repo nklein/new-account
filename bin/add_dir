@@ -1,0 +1,108 @@
+#!/bin/sh
+
+    #
+    # Check for append mode
+    #
+if [ "$1" = "-a" ]; then
+    append=TRUE;
+    shift;
+fi;
+
+    #
+    # Retrieve variable name for directory addition
+    #
+var=$1; shift;
+
+    #
+    # Locate the sed program
+    #
+if [ -f /bin/sed ]; then
+    sed=/bin/sed;
+else
+    sed=/usr/bin/sed;
+fi;
+
+    #
+    # Separate out the elements of the current variable
+    #
+current="`eval echo \\$${var} | ${sed} -e 's/:/ /g'`";
+
+    #
+    # Prepare the head of the variable's value
+    #
+head="";
+
+while [ ! "$1" = "" ]; do
+
+	#
+	# Get the next bit to add
+	#
+    val="$1"; shift;
+
+	#
+	# Add the current directory to the head of the list
+	#
+    if [ "${head}" = "" ]; then
+	head="${val}";
+    else
+	head="${head}:${val}";
+    fi;
+
+	#
+	# Prepare the tail of the variable's value
+	# with the path removed from anywhere it appears
+	# later...
+	#
+    tail="";
+
+	#
+	# Add the current directory to the head of the list
+	#
+    for dir in ${current}; do
+
+	    #
+	    # Skip the directory if it appears later in
+	    # the path so it doesn't appear twice
+	    #
+	if [ ! "${dir}" = "${val}" ]; then
+	    if [ "${tail}" = "" ]; then
+		tail="${dir}";
+	    else
+		tail="${tail}:${dir}";
+	    fi
+	fi;
+    done;
+
+	#
+	# Update current
+	#
+    export tail;
+    current="`eval echo ${tail} | ${sed} -e 's/:/ /g'`";
+done;
+
+    #
+    # Assemble new value out of head and tail
+    #
+if [ "$head" = "" ]; then
+    new="`eval echo \\$${var}`";
+elif [ "$tail" = "" ]; then
+    new="${head}";
+else
+    if [ "${append}" = "" ]; then
+	new="${head}:${tail}";
+    else
+	new="${tail}:${head}";
+    fi;
+fi;
+
+    #
+    # Output the new value for the shell
+    #
+case "`echo ${SHELL} | ${sed} -e 's:.*/::'`" in
+    sh|ksh)
+	echo "${var}=${new}; export ${var}";
+	;;
+    *)
+	echo "setenv ${var} \"${new}\"";
+	;;
+esac;

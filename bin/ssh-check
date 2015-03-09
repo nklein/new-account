@@ -1,0 +1,12 @@
+#!/bin/sh
+
+for prefix in /etc /etc/ssh /usr/local/etc /usr/local/etc/ssh; do
+    if [ -f ${prefix}/sshd_config ]; then
+	for file in ${prefix}/*.pub; do
+	    ssh-keygen -l -f ${file}
+	done
+	exit 0;
+    fi
+done
+
+exit 1;

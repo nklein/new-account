@@ -1,0 +1,15 @@
+setenv PATH "/bin:/sbin"
+add PATH /usr/sbin /usr/bin
+add PATH /usr/local/sbin /usr/local/bin
+add PATH "${HOME}/bin"
+
+setenv EDITOR emacsclient
+setenv VISUAL "${EDITOR}"
+setenv ALTERNATE_EDITOR "${VISUAL}"
+setenv EXINIT 'set ai sw=4 nohlsearch'
+
+setenv LC_COLLATE "C"
+
+setenv GREP_OPTIONS '--exclude=*.svn-base --exclude=entries'
+
+setenv PERL5LIB "${HOME}/lib/perl"

@@ -1,0 +1,15 @@
+
+if [ -z "${SSH_AUTH_SOCK}" ]; then
+    SSH_INFO_FILE="${HOME}/.ssh-agent.info"
+
+    if [ -f ${SSH_INFO_FILE} ]; then
+	. ${SSH_INFO_FILE} 1> /dev/null 2> /dev/null
+    fi
+
+    ssh-add -l > /dev/null 2> /dev/null
+    if [ "$?" = "2" ]; then
+	ssh-agent -s > ${SSH_INFO_FILE} 2> /dev/null
+	. ${SSH_INFO_FILE}
+	ssh-add
+    fi
+fi

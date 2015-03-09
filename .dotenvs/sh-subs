@@ -1,0 +1,24 @@
+add() {
+    eval `${HOME}/bin/add_dir "$@"`
+}
+
+sub() {
+    eval `${HOME}/bin/sub_dir "$@"`
+}
+
+source() {
+    . "$@"
+}
+
+setenv() {
+    eval export $1=\"$2\"
+}
+
+unsetenv() {
+    eval export $1=
+    eval unset $1
+}
+
+hdr() {
+    echo ']0;'$*''
+}

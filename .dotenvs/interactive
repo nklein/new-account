@@ -1,0 +1,5 @@
+umask 022
+
+stty erase '^h'
+
+#source ${HOME}/.ssh-start

@@ -1,0 +1,79 @@
+#!/bin/sh
+
+    #
+    # Retrieve variable name for directory subtraction
+    #
+var=$1; shift;
+
+    #
+    # Locate the sed program
+    #
+if [ -x /bin/sed ]; then
+    sed=/bin/sed
+else
+    sed=/usr/bin/sed
+fi;
+
+    #
+    # Separate out the elements of the current variable
+    #
+current="`eval echo \\$${var} | ${sed} -e 's/:/ /g'`";
+
+if [ "${current}" = "" ]; then
+
+	#
+	# Leave the variable unchanged, if it doesn't exist?
+	#
+    new="`eval echo \\$${var}`";
+
+else
+	#
+	# Loop through each variable to remove and remove it
+	#
+    while [ ! "$1" = "" ]; do
+	val=$1; shift;
+
+	    #
+	    # Prepare new value
+	    #
+	new="";
+
+	for dir in ${current}; do
+
+		#
+		# If the val and dir match, then don't add
+		# this to new
+		#
+	    if [ ! "${dir}" = "${val}" ]; then
+		if [ "${new}" = "" ]; then
+		    new="${dir}";
+		else
+		    new="${new}:${dir}";
+		fi;
+	    fi;
+	done;
+
+	    #
+	    # Update current value
+	    #
+	export new;
+	current="`eval echo ${new} | ${sed} -e 's/:/ /g'`";
+    done;
+fi
+
+    #
+    # Output the new value for the shell
+    #
+case "`echo ${SHELL} | ${sed} -e 's:.*/::'`" in
+    sh|ksh)
+	echo "${var}=${new}; export ${var}";
+	;;
+    *)
+	if [ "${new}" = "" ]; then
+	    echo "unsetenv ${var}";
+	else
+	    echo "setenv ${var} ${new}";
+	fi;
+
+	;;
+esac;

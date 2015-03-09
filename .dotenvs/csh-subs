@@ -1,0 +1,3 @@
+alias add 'eval `${HOME}/bin/add_dir \!*`'
+alias sub 'eval `${HOME}/bin/sub_dir \!*`'
+alias echo 'echo "]0;"$*""'

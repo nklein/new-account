@@ -1,0 +1,6 @@
+if [ -z "$TERM" ]; then
+    echo Terminal type set to vt100
+    setenv TERM vt100
+    eval `tset -I -Q -s`
+fi
+

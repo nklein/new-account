@@ -1,0 +1,103 @@
+#!/usr/bin/perl
+
+use POSIX qw(dup2 pipe close);
+
+sub separateGrepArgs {
+    my @args = @_;
+    my @grep_args = ();
+    my $in_grep_args = 1;
+
+    while ( $in_grep_args && @args ) {
+        my $arg = shift @args;
+        push @grep_args, $arg;
+
+        if ( $arg =~ m/\A-e\z/ ) {
+            my $expr = shift @args;
+            push @grep_args, $expr;
+            $in_grep_args = 0;
+        } elsif ( $arg =~ m/\A[^-]/ ) {
+            $in_grep_args = 0;
+        }
+    }
+
+    if ( ! @args ) {
+        @args = ( ".", "-type", "f" );
+    }
+
+    if ( $args[0] =~ m/\A\*/ ) {
+        unshift @args, "-name"
+    }
+
+    if ( $args[0] =~ m/\A-/ ) {
+        unshift @args, "."
+    }
+
+    return ( \@grep_args, \@args );
+}
+
+sub safeDup {
+    my ( $from, $to ) = @_;
+    unless ( $from == $to ) {
+        dup2( $from, $to );
+        close( $from );
+    }
+}
+
+sub execFind {
+    my ( $stdin, $stdout, @args ) = @_;
+
+    close( $stdin );
+    safeDup( $stdout, 1 );
+
+    exec( '/usr/bin/find', @args, '-print0' );
+    die "Failed to exec find: $!";
+}
+
+sub forkFind {
+    my ( $stdin, $stdout, @args ) = @_;
+    my $child_pid = fork();
+
+    if ( !defined($child_pid) ) {
+        die "Cannot fork find: $!";
+    } elsif ($child_pid) {
+        return $child_pid;
+    } else {
+        execFind( $stdin, $stdout, @args );
+    }
+}
+
+sub execGrep {
+    my ( $stdin, $stdout, @args ) = @_;
+
+    safeDup( $stdin, 0 );
+    close( $stdout );
+
+    exec( '/usr/bin/xargs', '-0', 'grep', @args, '/dev/null' );
+    die "Failed to exec grep: $!";
+}
+
+sub forkGrep {
+    my ( $stdin, $stdout, @args ) = @_;
+
+    my $child_pid = fork();
+
+    if ( !defined($child_pid) ) {
+        die "Cannot fork find: $!";
+    } elsif ($child_pid) {
+        return $child_pid;
+    } else {
+        execGrep( $stdin, $stdout, @args );
+    }
+}
+
+sub main {
+    my @args = @_;
+    my ( $grep_args, $find_args ) = separateGrepArgs( @args );
+
+    my ( $read, $write ) = pipe();
+
+    forkFind( $read, $write, @$find_args );
+    execGrep( $read, $write, @$grep_args );
+}
+
+main( @ARGV );
