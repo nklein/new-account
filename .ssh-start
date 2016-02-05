@@ -1,15 +1,40 @@
+SSH_INFO_FILE="${HOME}/.ssh-agent.info"
 
-if [ -z "${SSH_AUTH_SOCK}" ]; then
-    SSH_INFO_FILE="${HOME}/.ssh-agent.info"
-
-    if [ -f ${SSH_INFO_FILE} ]; then
-	. ${SSH_INFO_FILE} 1> /dev/null 2> /dev/null
-    fi
-
+check_for_ssh()
+{
     ssh-add -l > /dev/null 2> /dev/null
-    if [ "$?" = "2" ]; then
-	ssh-agent -s > ${SSH_INFO_FILE} 2> /dev/null
-	. ${SSH_INFO_FILE}
-	ssh-add
+    case "$?" in
+        "0") echo "yes";;
+        "1") echo "yes keyless";;
+        *) echo "no";;
+    esac
+}
+
+has_ssh()
+{
+    case "$( check_for_ssh )" in
+        yes*) echo "yes";;
+        *) echo "no";;
+    esac
+}
+
+has_ssh_keys()
+{
+    case "$( check_for_ssh )" in
+        "yes") echo "yes";;
+        *) echo "no";;
+    esac
+}
+
+if [ $( has_ssh ) = "yes" ]; then
+    printenv | grep SSH_ | sed -e 's/^/export /' > ${SSH_INFO_FILE}
+elif [ -f ${SSH_INFO_FILE} ]; then
+    . ${SSH_INFO_FILE} 1> /dev/null 2> /dev/null
+    if [ $( has_ssh ) = "no" ]; then
+        ssh-agent -s > ${SSH_INFO_FILE} 2> /dev/null
     fi
+fi
+
+if [ $( has_ssh ) = "yes" ] && [ $( has_ssh_keys ) = "no" ]; then
+    ssh-add
 fi
