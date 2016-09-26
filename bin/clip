@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+use POSIX qw(dup2 pipe close);
+
+sub main {
+    my @args = @_;
+	my $or;
+	if ( $args[0] == '--or' ) {
+		shift @args;
+		$or = shift @args;
+	}
+    my $pre = shift @args || '(?:\A|[\[("\'])';
+    my $post = shift @args || '(?:[:,\s"\')\]]|\z)';
+    @ARGV = @args;
+
+    while ( my $line = <> ) {
+          if ( $line =~ m/${pre}(?:\s*[=:])?\s*(.*?)\s*?${post}/o ) {
+              my $value = $1;
+              print "$value\n";
+          } elsif ( $or && $line =~ m/${or}/o ) {
+              print "$line";
+		  }
+    }
+}
+
+main( @ARGV );
