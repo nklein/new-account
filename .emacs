@@ -4,6 +4,8 @@
       user-full-name "Patrick Stein"
       user-mail-address "pat@nklein.com")
 
+(add-to-list 'exec-path "/usr/local/bin")
+
 ;;; Be ready for emacsclient
 (server-start)
 
@@ -13,18 +15,40 @@
 (set-default-coding-systems 'utf-8-unix)
 (prefer-coding-system 'utf-8-unix)
 (setq-default default-buffer-file-coding-system 'utf-8-unix)
+(setq-default web-mode-markup-indent-offset 2)
 
 (add-hook 'text-mode-hook 'auto-fill-mode)
 (add-hook 'text-mode-hook 'paragraph-indent-minor-mode)
+(setq markdown-command "/usr/local/bin/markdown")
 
 ;;; Package stuff
 (require 'package)
 (package-initialize)
+;(add-to-list 'package-archives
+;             '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+             '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
 
 (add-to-list 'load-path (expand-file-name "~/.emacs.d"))
 (require 'braille-chords)
+
+(define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+
+;;; auto-complete
+(require 'auto-complete-config)
+(ac-config-default)
+
+;;; web-mode
+(require 'web-mode)
+(add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
+(setq web-mode-engines-alist '(("php" . "\\.php\\'")))
+(setq web-mode-ac-sources-alist
+      '(("php" . (ac-source-yasnippet ac-sources-php-auto-yasnippets))))
+
+;;; email stuff
+(add-to-list 'auto-mode-alist '("/mutt" . mail-mode))
+(add-hook 'mail-mode-hook (lambda () (epa-mail-mode)))
 
 ;;; Lisp mode stuff
 (load (expand-file-name "~/quicklisp/slime-helper.el"))
@@ -63,6 +87,16 @@ cursor to the new line."
 
 (setq common-lisp-hyperspec-root (expand-file-name "~/share/HyperSpec/"))
 
+;;; Clojure stuff
+(add-hook 'clojure-mode-hook 'paredit-mode)
+(add-hook 'clojure-mode-hook 'cider-mode)
+(add-hook 'cider-mode-hook #'eldoc-mode)
+(add-hook 'cider-mode-hook #'enable-paredit-mode)
+(setq cider-lein-command (expand-file-name "~/bin/lein"))
+
+;;; C++ stuff
+(setq-default c-basic-offset 4)
+
 ;;; Color scheme and fonts
 (if (display-graphic-p)
   (progn
@@ -72,6 +106,14 @@ cursor to the new line."
 
 
 (custom-set-variables
- )
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(auth-source-save-behavior nil))
 (custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(default ((t (:family "Inconsolata" :foundry "outline" :slant normal :weight normal :height 190 :width normal)))))
