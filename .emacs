@@ -29,7 +29,7 @@
 (add-to-list 'package-archives
              '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
 
-(add-to-list 'load-path (expand-file-name "~/.emacs.d"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/personal/"))
 (require 'braille-chords)
 
 (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
@@ -51,8 +51,8 @@
 (add-hook 'mail-mode-hook (lambda () (epa-mail-mode)))
 
 ;;; Lisp mode stuff
-(load (expand-file-name "~/quicklisp/slime-helper.el"))
-(setq inferior-lisp-program "/usr/local/bin/ccl")
+;(load (expand-file-name "~/quicklisp/slime-helper.el"))
+;(setq inferior-lisp-program "/usr/local/bin/ccl")
 
 (defun sbcl ()
   (interactive)
@@ -116,4 +116,4 @@ cursor to the new line."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Inconsolata" :foundry "outline" :slant normal :weight normal :height 190 :width normal)))))
+ '(default ((t (:family "Inconsolata" :foundry "outline" :slant normal :weight normal :height 110 :width normal)))))
