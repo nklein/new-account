@@ -17,7 +17,7 @@
 (setq-default default-buffer-file-coding-system 'utf-8-unix)
 (setq-default web-mode-markup-indent-offset 2)
 
-(add-hook 'text-mode-hook 'auto-fill-mode)
+;(add-hook 'text-mode-hook 'auto-fill-mode)
 (add-hook 'text-mode-hook 'paragraph-indent-minor-mode)
 (setq markdown-command "/usr/local/bin/markdown")
 
@@ -29,7 +29,9 @@
 (add-to-list 'package-archives
              '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
 
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/personal/"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/site-lisp"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/elpa"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/personal"))
 (require 'braille-chords)
 
 (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
@@ -52,7 +54,7 @@
 
 ;;; Lisp mode stuff
 ;(load (expand-file-name "~/quicklisp/slime-helper.el"))
-;(setq inferior-lisp-program "/usr/local/bin/ccl")
+(setq inferior-lisp-program "/usr/local/bin/ccl")
 
 (defun sbcl ()
   (interactive)
@@ -98,12 +100,15 @@ cursor to the new line."
 (setq-default c-basic-offset 4)
 
 ;;; Color scheme and fonts
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(tool-bar-mode -1)
+
 (if (display-graphic-p)
   (progn
     (setq solarized-contrast 'high)
     ;(load-theme 'solarized-dark t)
     (load-theme 'tango-dark t)))
-
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -116,4 +121,4 @@ cursor to the new line."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Inconsolata" :foundry "outline" :slant normal :weight normal :height 110 :width normal)))))
+ '(default ((t (:family "Inconsolata" :foundry "outline" :slant normal :weight normal :height 190 :width normal)))))
