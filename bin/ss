@@ -1,0 +1,11 @@
+#!/bin/sh
+
+SESSION="$@"
+
+if [ -z "${SESSION}" ]; then
+    #exec /usr/bin/tmux
+    exec /usr/bin/screen -xRR -O -s -/bin/bash -p =
+else
+    #exec /usr/bin/tmux new-session -A -s "${SESSION}"
+    exec /usr/bin/screen -xRR "${SESSION}" -O -s -/bin/bash -p =
+fi
