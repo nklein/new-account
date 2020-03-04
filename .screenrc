@@ -1,0 +1,5 @@
+caption always
+term xterm-color
+defscrollback 10000
+nethack on
+idle 0
