@@ -6,7 +6,7 @@ sub separateGrepArgs {
     my @args = @_;
     my @grep_args = ();
     my $in_grep_args = 1;
-
+    
     while ( $in_grep_args && @args ) {
         my $arg = shift @args;
         push @grep_args, $arg;
@@ -21,15 +21,17 @@ sub separateGrepArgs {
     }
 
     if ( ! @args ) {
-        @args = ( ".", "-type", "f" );
+        @args = ( '.', '-type', 'f' );
+    } elsif ( length @args == 1 ) {
+        push @args, '-type', 'f';
     }
 
     if ( $args[0] =~ m/\A\*/ ) {
-        unshift @args, "-name"
+        unshift @args, '-name'
     }
 
     if ( $args[0] =~ m/\A-/ ) {
-        unshift @args, "."
+        unshift @args, '.'
     }
 
     return ( \@grep_args, \@args );
@@ -44,12 +46,12 @@ sub safeDup {
 }
 
 sub execFind {
-    my ( $stdin, $stdout, @args ) = @_;
+    my ( $stdin, $stdout, $dir, @expr ) = @_;
 
     close( $stdin );
     safeDup( $stdout, 1 );
-
-    exec( '/usr/bin/find', @args, '-print0' );
+    
+    exec( '/usr/bin/find', $dir, '(', @expr, ')', '-print0' );
     die "Failed to exec find: $!";
 }
 
@@ -72,7 +74,7 @@ sub execGrep {
     safeDup( $stdin, 0 );
     close( $stdout );
 
-    exec( '/usr/bin/xargs', '-0', 'grep', @args, '/dev/null' );
+    exec( '/usr/bin/xargs', '-0', '/usr/bin/grep', @args, '/dev/null' );
     die "Failed to exec grep: $!";
 }
 
@@ -95,7 +97,7 @@ sub main {
     my ( $grep_args, $find_args ) = separateGrepArgs( @args );
 
     my ( $read, $write ) = pipe();
-
+    
     forkFind( $read, $write, @$find_args );
     execGrep( $read, $write, @$grep_args );
 }
