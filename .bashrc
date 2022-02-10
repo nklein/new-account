@@ -1,7 +1,2 @@
-for file in sh-subs env; do
-    if [ -f ${HOME}/.dotenvs/${file} ]; then
-	. ${HOME}/.dotenvs/${file}
-    fi
-done
-
+FROM_BASHRC=1
 . ${HOME}/.profile
