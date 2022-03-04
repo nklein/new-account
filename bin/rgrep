@@ -5,6 +5,7 @@ use POSIX qw(dup2 pipe close);
 sub separateGrepArgs {
     my @args = @_;
     my @grep_args = ();
+    my @find_args = ();
     my $in_grep_args = 1;
     
     while ( $in_grep_args && @args ) {
@@ -20,21 +21,34 @@ sub separateGrepArgs {
         }
     }
 
+    my $dir = ( -d $args[0] ) ? (shift @args) : '.';
+    push @find_args, $dir;
+    
     if ( ! @args ) {
-        @args = ( '.', '-type', 'f' );
-    } elsif ( length @args == 1 ) {
-        push @args, '-type', 'f';
+        push @find_args, '-type', 'f'
     }
-
+    
     if ( $args[0] =~ m/\A\*/ ) {
         unshift @args, '-name'
     }
 
-    if ( $args[0] =~ m/\A-/ ) {
-        unshift @args, '.'
+    while ( @args ) {
+        my $arg = shift @args;
+        if ($arg eq 'JAVA') {
+            push @find_args, '!', '(', '-name', 'test', '-prune', ')', '-name', '*.java';
+        } elsif ( $arg eq 'HEADERS' ) {
+            push @find_args, '!', '(', '-name', '[Tt]est', '-prune', ')', '(', '-name', '*.h', '-o', '-name', '*.hh', ')';
+        } elsif ( $arg eq 'CPP' ) {
+            unshift @args, '-o', 'HEADERS';
+            push @find_args, '!', '(', '-name', '[Tt]est', '-prune', ')', '(', '-name', '*.cpp', '-o', '-name', '*.cc', '-o', '-name', '*.C', ')';
+        } elsif ( $arg eq 'C' ) {
+            push @find_args, '!', '(', '-name', '[Tt]est', '-prune', ')', '(', '-name', '*.h', '-o', '-name', '*.c', ')';
+        } else {
+            push @find_args, $arg;
+        }
     }
-
-    return ( \@grep_args, \@args );
+    
+    return ( \@grep_args, \@find_args );
 }
 
 sub safeDup {
@@ -51,7 +65,7 @@ sub execFind {
     close( $stdin );
     safeDup( $stdout, 1 );
     
-    exec( '/usr/bin/find', $dir, '(', @expr, ')', '-print0' );
+    exec( '/usr/bin/find', $dir, '(', @expr, ')', '-a', '-type', 'f', '-print0' );
     die "Failed to exec find: $!";
 }
 
